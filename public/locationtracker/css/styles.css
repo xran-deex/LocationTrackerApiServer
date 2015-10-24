@@ -1,0 +1,32 @@
+.hide-on-large {
+    margin: 6px;
+}
+
+#sidenav-overlay {
+    opacity: 0;
+    display: none;
+}
+
+@media only screen and (min-width: 992px) {
+    .hide-on-large {
+        display: none;
+    }
+}
+
+h1, h4, h6 {
+    text-align: center;
+}
+
+.nameInput {
+    margin-top: 35px;
+}
+
+.train_btn {
+    margin-top: 20px;
+}
+
+.table_btn {
+    width: 90px;
+    padding: 0 8px;
+    font-size: 0.8em;
+}
