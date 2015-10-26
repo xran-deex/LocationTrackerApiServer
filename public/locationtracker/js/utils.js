@@ -7,6 +7,7 @@
     m.request({method:'get', url:app.APIURL+'/user'}).then(function(res){
         if(res.success) {
             app.user(res.result);
+            if(app.model)
             app.model.update();
         } else {
             m.route('/login');

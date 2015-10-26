@@ -20,7 +20,7 @@ function Auth(sessions){
             message: err,
             data: {}
         };
-        callback({
+        callback(null, {
             result: result
         });
     };
@@ -35,7 +35,6 @@ function Auth(sessions){
                     handleError(err, callback);
                 } else {
                     bcrypt.compare(data.password, res.password, function(err, hashResult){
-			console.log(hashResult);
                         if(!hashResult)
                             handleError('Invalid password', callback);
                         else
@@ -44,7 +43,7 @@ function Auth(sessions){
                 }
             });
         }
-    }
+    };
 
     /**
      *  Handles inserting a new user in the database
@@ -74,7 +73,7 @@ function Auth(sessions){
                 callback(null, result);
             }
         }
-    }
+    };
 
     var handleHashCompare = function(err, res, callback){
 
@@ -89,7 +88,7 @@ function Auth(sessions){
         };
         //var sessionId = createAndStoreSession(result.data);//, conn);
         callback(err, result);//, sessionId);
-    }
+    };
 
     var createAndStoreSession = function(id, conn){
         var sessionId = r.uuid();
@@ -99,7 +98,7 @@ function Auth(sessions){
         //sessions[sessionId] = '';
         //r.table('sessions').insert({user_id:id, sessionId: sessionId}).run(conn, function(err, res){});
         return sessionId;
-    }
+    };
 
     this.login = function(data, callback){
         var self = this;
@@ -126,6 +125,7 @@ function Auth(sessions){
                 bcrypt.hash(data.password, 10, function(err, hash_res){
                     // update the password with the new hashed password and insert in the database
                    data.password = hash_res;
+                   data.apikey = r.uuid();
                    r.table(db_config.userTable).insert(data, {returnChanges: true}).run(conn, function(err, res) {
                        handleInsert(err, res, callback);
                    });

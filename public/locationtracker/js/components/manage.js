@@ -47,7 +47,7 @@
         };
     };
 
-    var vm = function(){
+    var VM = function(){
         var self = this;
         self.ws = null;
         self.model = app.model = new Model();
@@ -55,7 +55,34 @@
         this.showNameForm = m.prop(false);
         this.name = m.prop();
         self.log = m.prop('');
+        self.wait = m.prop(false);
         this.train_btn_text = m.prop('Train');
+        self.hasDeleted = m.prop(false);
+        self.deleteCheck = function(){
+            self.hasDeleted(false);
+            self.model.data().forEach(function(item){
+                if(item.selected()){
+                    self.hasDeleted(true);
+                }
+            });
+        };
+        self.delete = function(){
+            let yes = confirm('Are you sure?');
+            if(yes){
+                self.wait(true);
+                self.model.data().forEach(function(item){
+                    if(item.selected()){
+                        m.request({method:'delete', url:app.APIURL+'/train?apikey='+app.user().apikey, data:{id: item.id}}).then(function(res){
+                            self.model.data(self.model.data().filter(function(item2){
+                                return item !== item2;
+                            }));
+                            self.hasDeleted(false);
+                            self.wait(false);
+                        });
+                    }
+                });
+            }
+        };
         this.train = function(){
             self.showNameForm(!self.showNameForm());
             if(self.showNameForm()){
@@ -81,6 +108,7 @@
                     m.endComputation();
                 }
             };
+            self.hasDeleted(false);
             m.request({method:'post', url:app.APIURL+'/train?apikey='+app.user().apikey, data: {ids: ids, name: self.name()}}).then(function(res){
                 console.log(res);
                 self.showNameForm(false);
@@ -95,31 +123,55 @@
 
     // the app controller
     var ctrl = function(){
-        this.vm = new vm();
+        this.vm = new VM();
+    };
+
+    var deleteView = function(ctrl){
+        if(ctrl.vm.hasDeleted()){
+            return m('div.btnspinner', [
+                (function(){
+                    if(!ctrl.vm.wait())
+                    return [
+                        m('button.btn.waves-effect.waves-light', {onclick: ctrl.vm.delete}, 'Delete selected'),
+                        m('button.btn.waves-effect.waves-light.train_btn', {onclick: ctrl.vm.train}, ctrl.vm.train_btn_text()),
+                    ];
+                })(),
+                (function(){
+                    if(ctrl.vm.wait())
+                    return m('div.preloader-wrapper.big.active.spinner', [
+                        m('div.spinner-layer.spinner-blue-only', [
+                            m('div.circle-clipper.left', [
+                                m('div.circle')
+                            ]),
+                            m('div.gap-patch', [
+                                m('div.circle')
+                            ]),
+                            m('div.circle-clipper.right', [
+                                m('div.circle')
+                            ])
+                        ])
+                    ]);
+                })()
+                ]);
+        }
     };
 
     var tableview = function(ctrl){
         return m('table', [
             m('thead', [
                 m('tr', [
-                    m('th', 'Include in Training'),
-                    //m('th', 'Id'),
+                    m('th', 'Train'),
                     m('th', 'Name'),
-                    m('th', '')
                 ]),
             ]),
             m('tbody', [
                 ctrl.vm.model.data().map(function(item, i){
                     return m('tr', [
                         m('td', [
-                            m('input[type=checkbox]', {id: 'item'+i, onclick: m.withAttr("checked", item.selected), checked: item.selected()}),
+                            m('input[type=checkbox]', {id: 'item'+i, onchange: ctrl.vm.deleteCheck, onclick: m.withAttr("checked", item.selected), checked: item.selected()}),
                             m('label', {for: 'item'+i})
                         ]),
-                        //m('td', item.id),
                         m('td', item.name),
-                        m('td', [
-                            m('button.table_btn.btn.waves-effect.waves-light', {onclick: item.delete}, 'Delete')
-                        ])
                     ]);
                 })
             ])
@@ -149,12 +201,7 @@
                     m('h4', 'My Locations'),
                     tableview(ctrl),
                     m('div.row', [
-                        (function(){
-                            if(ctrl.vm.model.data().length > 0)
-                            return m('div.train_btn', {class: 'col s8 offset-s4'}, [
-                                m('button.btn.waves-effect.waves-light', {onclick: ctrl.vm.train}, ctrl.vm.train_btn_text()),
-                            ]);
-                        })()
+                        deleteView(ctrl)
                     ])
                 ]),
                 m('h6', ctrl.vm.log()),

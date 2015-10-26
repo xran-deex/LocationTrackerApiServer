@@ -1,5 +1,5 @@
 (function(app){
-    
+
 
 })(app = window.app || {});
 
@@ -16,6 +16,11 @@ var NavLinks = [
     {
         name:'Trained Locations',
         href:'#/locations',
+        loggedIn: true
+    },
+    {
+        name:'Logout',
+        href:'#/logout',
         loggedIn: true
     },
     {
@@ -46,6 +51,15 @@ m.mount(document.getElementById('nav'), m.component(app.Nav, {nav_items: navLink
 m.route(document.getElementById('app'), '/', {
     '/': app.Page1,
     '/login': app.Login,
+    '/signup': app.Signup,
     '/manage': app.ManageLocations,
-    '/locations': app.TrainedLocations
+    '/locations': app.TrainedLocations,
+    '/logout': {
+        controller: function(){
+            m.request({method:'get', url:app.APIURL+'/logout'}).then(function(res){
+                m.route('/login');
+            });
+        },
+        view: function(ctrl){}
+    }
 });

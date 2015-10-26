@@ -22,6 +22,7 @@ h1, h4, h6 {
 }
 
 .train_btn {
+    width: 100%;
     margin-top: 20px;
 }
 
@@ -29,4 +30,17 @@ h1, h4, h6 {
     width: 90px;
     padding: 0 8px;
     font-size: 0.8em;
+}
+
+.btnspinner {
+    margin: 0 auto;
+    width: 40%;
+}
+
+.spinner {
+    margin-left: 30px;
+}
+
+nav {
+    background-color: #41446F;
 }

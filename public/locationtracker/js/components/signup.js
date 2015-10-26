@@ -2,12 +2,29 @@
 
     var vm = function(){
         var self = this;
+        self.wait = m.prop(false);
         self.email = m.prop();
         self.password = m.prop();
+        self.password2 = m.prop();
+        self.pass2valid = m.prop(true);
+        self.validate = function(val){
+            console.log(val);
+            self.password2(val);
+            if(self.password() !== self.password2()){
+                self.pass2valid(false);
+            } else {
+                self.pass2valid(true);
+            }
+        };
+
         self.submit = function(){
+            if(self.password() !== self.password2()){
+                alert("Passwords don't match");
+                return;
+            }
             self.wait(true);
             setTimeout(function(){
-                m.request({method:'POST', url:exports.APIURL+'/login', data:{
+                m.request({method:'POST', url:exports.APIURL+'/signup', data:{
                     email: self.email(),
                     password: self.password()
                 }}).then(function(res){
@@ -15,16 +32,12 @@
                         self.wait(false);
                         app.user(res.result);
                         m.route('/');
-                        Materialize.toast('Login successful', 2000);
                     } else {
                         console.log(res.err);
-                        self.wait(false);
-                        Materialize.toast('Incorrect username or password', 2000);
                     }
                 });
-            },0);
+            }, 0);
         };
-        self.wait = m.prop(false);
     };
 
     var ctrl = function(){
@@ -34,7 +47,7 @@
     var view = function(ctrl){
         return m('div', {class: 'col s12 l6 offset-l3'}, [
             m('div', {class: 'row'}, [
-                m('h1', 'Login'),
+                m('h1', 'Signup'),
                 m('div.input-field.col.s12.l12', [
                     m('input[type=email]#email', {onchange: m.withAttr('value', ctrl.vm.email), placeholder: 'Email', class: 'validate', name:'email'}, ctrl.vm.email()),
                     m('label', {for: 'email', class: 'active'}, 'Email:')
@@ -42,6 +55,10 @@
                 m('div.input-field.col.s12.l12', [
                     m('input[type=password]#password', {onchange: m.withAttr('value', ctrl.vm.password), placeholder: 'Password', class: 'validate', name:'password'}, ctrl.vm.password()),
                     m('label', {for: 'password', class: 'active'}, 'Password:')
+                ]),
+                m('div.input-field.col.s12.l12', [
+                    m('input[type=password]#password2', {onkeyup: m.withAttr('value', ctrl.vm.validate), placeholder: 'Password', class: ctrl.vm.pass2valid() ? 'validate' : 'validate invalid', name:'password2'}, ctrl.vm.password2()),
+                    m('label', {for: 'password2', class: 'active'}, 'Retype Password:')
                 ])
             ]),
             m('div.btnspinner', [
@@ -76,5 +93,5 @@
         controller: ctrl
     };
 
-    exports.Login = component;
+    exports.Signup = component;
 })(app = window.app || {});

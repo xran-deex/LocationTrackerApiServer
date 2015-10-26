@@ -111,19 +111,25 @@ app.post('/locationtracker/login', function(req,res,next){
     })(req, res, next);
 });
 
+app.get('/locationtracker/logout', function(req,res){
+    req.logout();
+    res.json({success:true});
+});
+
 app.post('/locationtracker/signup', function(req, res){
     auth.signup(req.body, function(err, newUser){
         if(err) res.json({success:false, error: err});
         else {
-            req.session.user = newUser.data.id;
-            res.json({success: true, result: newUser});
+            req.login(newUser.data, function(err){
+                if(err) res.json({success:false});
+                else res.json({success: true, result: newUser});
+            });
         }
     });
 });
 
 // posts training data for a given location
 app.post('/locationtracker/data', function(req, res){
-
     if(!req.body.apikey){
         res.json({error:'Missing apikey'});
     } else {
@@ -180,6 +186,7 @@ app.get('/locationtracker/train', function(req, res){
                 res.json(result.map(function(item){
                     return {
                         ready: (item.network != null),
+                        _default: item._default,
                         name: item.name,
                         id: item.id
                     };
@@ -209,6 +216,32 @@ app.delete('/locationtracker/train/', function(req, res){
         r.table('trained_locations').get(req.body.id).delete().run(conn).then(function(result){
             res.json(result);
         }).error(function(err){res.json(err);});
+    });
+});
+
+app.put('/locationtracker/train/', function(req, res){
+    if(!req.query.apikey){
+        res.json({error:'Missing apikey'});
+    } else
+    r.connect(db_config).then(function(conn){
+        r.table('trained_locations').update({apikey:req.query.apikey, '_default':false}).run(conn).then(function(){
+            r.table('trained_locations').get(req.body.id).update({'_default':true}).run(conn).then(function(result){
+                    res.json(result);
+                }).error(function(err){res.json(err);});
+        });
+    });
+});
+
+app.get('/locationtracker/default', function(req, res){
+    if(!req.query.apikey){
+        res.json({error:'Missing apikey'});
+    } else
+    r.connect(db_config).then(function(conn){
+        r.table('trained_locations').filter({apikey:req.query.apikey, '_default':true}).run(conn).then(function(cursor){
+                cursor.next().then(function(item){
+                    res.json(item);
+                });
+            }).error(function(err){res.json(err);});
     });
 });
 

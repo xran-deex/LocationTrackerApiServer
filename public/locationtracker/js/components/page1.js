@@ -28,7 +28,8 @@
         return [
             m('h1', ctrl.vm.model.title()),
             m('p', {class: 'caption'}, 'Geofencing indoors'),
-            m('h5', ctrl.vm.welcomeMsg())
+            m('h5', ctrl.vm.welcomeMsg()),
+            m('h5', app.user().email ? 'APIKEY: ' + app.user().apikey : '')
         ];
     };
 
