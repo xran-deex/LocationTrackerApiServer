@@ -222,7 +222,7 @@ app.post('/locationtracker/data', function(req, res){
     } else {
         r.connect(db_config).then(function(conn){
             r.table('locations')
-				.insert({apikey: req.body.apikey, name: req.body.name, data: req.body.data, preferedWifi: req.body.preferedWifi})
+				.insert({apikey: req.body.apikey, name: req.body.name, data: req.body.data})//, preferedWifi: req.body.preferedWifi})
 				.run(conn).then(function(result2){res.json(result2);});
         });
     }
@@ -369,7 +369,7 @@ app.post('/locationtracker/train', function(req, res){
                     ids: req.body.ids,
                     locations: arr,
                     //type: req.body.type,
-                    preferedWifi: arr[0].preferedWifi,
+                    //preferedWifi: arr[0].preferedWifi,
                     apikey: req.query.apikey
                 }).run(conn).then(function(result){
                     // train the data
