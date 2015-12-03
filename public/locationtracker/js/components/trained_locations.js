@@ -6,6 +6,7 @@
         this.name = opt.name;
         this.id = opt.id;
         this.ready = opt.ready;
+	this.error = opt.error || NaN;
         this.selected = m.prop(false);
         this.default = m.prop(opt._default);
 
@@ -138,6 +139,7 @@
                     m('tr', [
                         m('th', 'Name'),
                         m('th', 'Ready'),
+			m('th', 'Error'),
                         m('th', 'Delete'),
                         m('th', 'Default')
                     ]),
@@ -147,6 +149,7 @@
                         return m('tr', [
                             m('td', item.name),
                             m('td', item.ready ? 'Yes':'No'),
+			    m('td', item.error.toFixed(5)),
                             m('td', [
                                 m('input[type=checkbox]', {id: 'item'+i, onchange: ctrl.vm.deleteCheck, onclick: m.withAttr("checked", item.selected), checked: item.selected()}),
                                 m('label', {for: 'item'+i})

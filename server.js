@@ -64,15 +64,43 @@ passport.use(new LocalStrategy(
 // spawn a new training process and listen for messages.
 // messages will be broadcast to connected websockets
 var cp = require('child_process');
-
+var trainer_process;
 var train = function(data){
-    var trainer_process = cp.fork(__dirname+'/trainer.js');
+    trainer_process = cp.fork(__dirname+'/trainer.js');
     trainer_process.on('message', function(m){
 
         if(m.result) {
             r.connect(db_config).then(function(conn){
                 r.table('trained_locations').get(m.id).update({
-                    network: m.result.network
+                    network: m.result.network,
+		            info: m.result.result,
+                    type: 'nn'
+                }).run(conn);
+            });
+            wss.broadcast(JSON.stringify({'result': m.result}));
+        }
+        try{
+            if(m.log) {
+                wss.broadcast(JSON.stringify({'log': m.log}));
+            }
+        } catch(e){
+            console.log(e);
+            trainer_process.kill('SIGKILL');
+        }
+    });
+    trainer_process.send(data);
+};
+
+var trainsvm = function(data){
+    var trainer_process = cp.fork(__dirname+'/trainer-svm.js');
+    trainer_process.on('message', function(m){
+
+        if(m.result) {
+            r.connect(db_config).then(function(conn){
+                r.table('trained_locations').get(m.id).update({
+                    network: m.result.network,
+		            info: m.result.result,
+                    type: 'svm'
                 }).run(conn);
             });
             if(!ws) return;
@@ -88,7 +116,18 @@ var train = function(data){
             trainer_process.kill('SIGKILL');
         }
     });
-    trainer_process.send(data);
+    var svmdata = data.data.map(function(item){
+        return item.input;
+    });
+    var svmlabels = data.data.map(function(item){
+        if(item.output[0] == 1){
+            return 0;
+        }
+        if(item.output[1] == 1){
+            return 1;
+        }
+    });
+    trainer_process.send({id: data.id, data: svmdata, labels: svmlabels});
 };
 
 app.use(function(req, res, next){
@@ -128,6 +167,54 @@ app.post('/locationtracker/signup', function(req, res){
     });
 });
 
+app.post('/locationtracker/wifi', function(req, res){
+    if(!req.query.apikey){
+        res.json({error:'Missing apikey'});
+    } else
+    r.connect(db_config).then(function(conn){
+    	r.table('wifi_data').insert(req.body).run(conn).then(function(result){
+            res.json(result);
+        });
+    });
+});
+
+app.put('/locationtracker/wifi', function(req, res){
+    if(!req.query.apikey){
+        res.json({error:'Missing apikey'});
+    } else
+    r.connect(db_config).then(function(conn){
+    	r.table('wifi_data').get(req.body.id).update(req.body).run(conn).then(function(result){
+            res.json(result);
+        });
+    });
+});
+
+app.get('/locationtracker/wifi', function(req, res){
+    if(!req.query.apikey){
+        res.json({error:'Missing apikey'});
+    } else
+    r.connect(db_config).then(function(conn){
+        r.table('wifi_data').run(conn).then(function(result){
+            result.toArray().then(function(arr){
+                res.json(arr);
+            });
+	    });
+    });
+});
+
+//delete the wifi data
+app.delete('/locationtracker/wifi', function(req, res){
+    if(!req.query.apikey){
+        res.json({error:'Missing apikey'});
+    } else
+    r.connect(db_config).then(function(conn){
+        r.table('wifi_data').delete().run(conn).then(function(result){
+            res.json(result);
+	    });
+    });
+});
+
+
 // posts training data for a given location
 app.post('/locationtracker/data', function(req, res){
     if(!req.body.apikey){
@@ -135,11 +222,8 @@ app.post('/locationtracker/data', function(req, res){
     } else {
         r.connect(db_config).then(function(conn){
             r.table('locations')
-            .insert({apikey: req.body.apikey, name: req.body.name, data: req.body.data})
-            .run(conn)
-            .then(function(result){
-                res.json(result);
-            });
+				.insert({apikey: req.body.apikey, name: req.body.name, data: req.body.data, preferedWifi: req.body.preferedWifi})
+				.run(conn).then(function(result2){res.json(result2);});
         });
     }
 });
@@ -188,7 +272,8 @@ app.get('/locationtracker/train', function(req, res){
                         ready: (item.network != null),
                         _default: item._default,
                         name: item.name,
-                        id: item.id
+                        id: item.id,
+			            error: item.info ? item.info.error : ''
                     };
                 }));
             });
@@ -248,7 +333,6 @@ app.get('/locationtracker/default', function(req, res){
 // handle training. accepts a list of ids of traind locations
 app.post('/locationtracker/train', function(req, res){
     if(!req.query.apikey) return res.json({success: false, error: 'Missing apikey'});
-    console.log(req.body.ids);
     r.connect(db_config).then(function(conn){
         r.table('locations').getAll(r.args(req.body.ids)).run(conn).then(function(cursor){
             // pull out the data
@@ -265,7 +349,6 @@ app.post('/locationtracker/train', function(req, res){
                     return 0;
                 });
                 arr.forEach(function(d, index){
-                    console.log(index);
                     var temp = d.data.map(function(item){
                         // create an array of length numTrainingIds and set it to all zeros
                         var out = Array.apply(null, Array(numTrainingIds)).map(Number.prototype.valueOf,0);
@@ -285,10 +368,15 @@ app.post('/locationtracker/train', function(req, res){
                     network: null,
                     ids: req.body.ids,
                     locations: arr,
+                    //type: req.body.type,
+                    preferedWifi: arr[0].preferedWifi,
                     apikey: req.query.apikey
                 }).run(conn).then(function(result){
                     // train the data
-                    train({id: result.generated_keys[0], data: training_set});
+                    if(req.body.type == 'svm')
+                        trainsvm({id: result.generated_keys[0], data: training_set});
+                    else
+                        train({id: result.generated_keys[0], data: training_set});
                     res.json({success: true});
                 });
 
@@ -318,10 +406,21 @@ var server = app.listen(3000, function () {
 var WebSocketServer = require('ws').Server
 , wss = new WebSocketServer({ port: 3001 });
 
-var ws;
+//var ws;
 wss.on('connection', function connection(socket) {
-    ws = socket;
-    ws.on('message', function incoming(message) {
+    //ws = socket;
+    socket.on('message', function incoming(message) {
+        if(message == 'abort'){
+            if(trainer_process){
+                trainer_process.kill('SIGKILL');
+            }
+        }
         console.log('received: %s', message);
     });
 });
+
+wss.broadcast = function broadcast(data) {
+    wss.clients.forEach(function each(client) {
+        client.send(data);
+    });
+};

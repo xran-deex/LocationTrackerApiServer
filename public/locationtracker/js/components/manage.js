@@ -72,7 +72,7 @@
                 self.wait(true);
                 self.model.data().forEach(function(item){
                     if(item.selected()){
-                        m.request({method:'delete', url:app.APIURL+'/train?apikey='+app.user().apikey, data:{id: item.id}}).then(function(res){
+                        m.request({method:'delete', url:app.APIURL+'/data?apikey='+app.user().apikey, data:{id: item.id}}).then(function(res){
                             self.model.data(self.model.data().filter(function(item2){
                                 return item !== item2;
                             }));
@@ -97,17 +97,7 @@
             }).map(function(item){
                 return item.id;
             });
-            self.ws = new WebSocket('ws://valis.strangled.net/locationtrackersocket');
 
-            // monitor progress messages from the server
-            self.ws.onmessage = function(event){
-                var data = JSON.parse(event.data);
-                if(data.log){
-                    m.startComputation();
-                    self.log('Error: ' + data.log.error.toFixed(4));
-                    m.endComputation();
-                }
-            };
             self.hasDeleted(false);
             m.request({method:'post', url:app.APIURL+'/train?apikey='+app.user().apikey, data: {ids: ids, name: self.name()}}).then(function(res){
                 console.log(res);
@@ -118,6 +108,22 @@
             }, function(err){
                 console.log(err);
             });
+        };
+        self.ws = new WebSocket('ws://valis.strangled.net/locationtrackersocket');
+
+        // monitor progress messages from the server
+        self.ws.onmessage = function(event){
+            var data = JSON.parse(event.data);
+            if(data.log){
+                m.startComputation();
+                self.log('Error: ' + data.log.error.toFixed(4));
+                m.endComputation();
+            }
+        };
+
+        self.cancel = function(){
+            self.log('');
+            self.ws.send('abort');
         };
     };
 
@@ -193,6 +199,16 @@
         }
     };
 
+    var cancelTraining = function(ctrl){
+        if(ctrl.vm.log()){
+            return m('div.row', [
+                m('div', {class: 'col s8 offset-s4'}, [
+                    m('button.btn.waves-effect.waves-light', {onclick: ctrl.vm.cancel}, 'Cancel')
+                ])
+            ]);
+        }
+    };
+
     app.ManageLocations = {
         controller: ctrl,
         view: function(ctrl){
@@ -205,6 +221,7 @@
                     ])
                 ]),
                 m('h6', ctrl.vm.log()),
+                cancelTraining(ctrl),
                 nameFormView(ctrl)
             ];
         }
