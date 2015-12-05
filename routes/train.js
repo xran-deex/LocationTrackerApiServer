@@ -114,7 +114,7 @@ module.exports = {
             });
         }
     },
-    train: function(req, res){
+    train: function(req, res, wss){
         if(!req.query.apikey) return res.json({success: false, error: 'Missing apikey'});
         r.connect(db_config).then(function(conn){
             r.table('locations').getAll(r.args(req.body.ids)).run(conn).then(function(cursor){
@@ -136,9 +136,9 @@ module.exports = {
                     }).run(conn).then(function start_training(result){
                         // train the data using either a support vector machine, or a neural network
                         if(req.body.type == 'svm')
-                            trainer_process = training.trainsvm({id: result.generated_keys[0], data: training_set}, this.wss);
+                            trainer_process = training.trainsvm({id: result.generated_keys[0], data: training_set}, wss);
                         else
-                            trainer_process = training.train({id: result.generated_keys[0], data: training_set}, this.wss);
+                            trainer_process = training.train({id: result.generated_keys[0], data: training_set}, wss);
                         // after training has been started, send back success
                         res.json({success: true});
                     });

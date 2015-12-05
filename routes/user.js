@@ -5,7 +5,7 @@ module.exports = {
     user: function(req, res){
         res.json({success:true, result:req.user||{}});
     },
-    login: function(err, user, info) {
+    login: function(req, res, err, user, info) {
         if (err) { return next(err); }
         if (!user) { return res.json({success: false, err: info}); }
         req.login(user, function(err) {
@@ -17,7 +17,7 @@ module.exports = {
         req.logout();
         res.json({success:true});
     },
-    signup: function(err, newUser){
+    signup: function(req, res, err, newUser){
         if(err) res.json({success:false, error: err});
         else {
             req.login(newUser.data, function(err){

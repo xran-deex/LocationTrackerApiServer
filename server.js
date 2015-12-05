@@ -74,11 +74,11 @@ passport.use(new LocalStrategy(
 /// user routes ///
 app.get('/locationtracker/user', user_routes.user);
 app.post('/locationtracker/login', function(req,res,next){
-    passport.authenticate('local', user_routes.login)(req, res, next);
+    passport.authenticate('local', user_routes.login.bind(null, req, res))(req, res, next);
 });
 app.get('/locationtracker/logout', user_routes.logout);
 app.post('/locationtracker/signup', function(req, res){
-    auth.signup(req.body, user_routes.signup);
+    auth.signup(req.body, user_routes.signup.bind(null, req, res));
 });
 
 /// wifi routes ///
@@ -98,7 +98,9 @@ app.get('/locationtracker/train/:id', train_routes.get_one);
 app.delete('/locationtracker/train/', train_routes.delete);
 app.put('/locationtracker/train/', train_routes.update);
 app.get('/locationtracker/default', train_routes.get_default);
-app.post('/locationtracker/train', train_routes.train.bind(wss));
+app.post('/locationtracker/train', function(req, res){
+    train_routes.train(req, res, wss);
+});
 
 app.post('/locationtracker', function(req, res){
     training.train({id: -1, data: req.body});
