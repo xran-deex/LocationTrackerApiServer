@@ -44,7 +44,8 @@
                     m('label', {for: 'password', class: 'active'}, 'Password:')
                 ])
             ]),
-            m('div.btnspinner', [
+            m('div.row.flex-container', [
+                m('div.btnspinner', [
                 (function(){
                     if(!ctrl.vm.wait())
                     return m('button.btn.waves-effect.waves-light', {onclick: ctrl.vm.submit}, 'Submit', [
@@ -68,6 +69,7 @@
                     ]);
                 })()
             ])
+        ])
         ]);
     };
 

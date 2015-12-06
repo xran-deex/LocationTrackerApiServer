@@ -105,7 +105,8 @@
 
     var deleteView = function(ctrl){
         if(ctrl.vm.hasDeleted()){
-            return m('div.btnspinner', [
+            return m('div.row.flex-container', [
+            m('div.btnspinner', [
                 (function(){
                     if(!ctrl.vm.wait())
                     return m('button.btn.waves-effect.waves-light', {onclick: ctrl.vm.delete}, 'Delete selected', [
@@ -128,7 +129,8 @@
                         ])
                     ]);
                 })()
-                ]);
+            ])
+        ]);
         }
     };
 
@@ -139,7 +141,7 @@
                     m('tr', [
                         m('th', 'Name'),
                         m('th', 'Ready'),
-			m('th', 'Error'),
+			            m('th', 'Error'),
                         m('th', 'Delete'),
                         m('th', 'Default')
                     ]),
@@ -149,7 +151,7 @@
                         return m('tr', [
                             m('td', item.name),
                             m('td', item.ready ? 'Yes':'No'),
-			    m('td', item.error.toFixed(5)),
+			                m('td', item.error.toFixed(5)),
                             m('td', [
                                 m('input[type=checkbox]', {id: 'item'+i, onchange: ctrl.vm.deleteCheck, onclick: m.withAttr("checked", item.selected), checked: item.selected()}),
                                 m('label', {for: 'item'+i})
@@ -161,8 +163,7 @@
                         ]);
                     })
                 ])
-            ]),
-            deleteView(ctrl)
+            ])
         ]);
     };
 
@@ -172,6 +173,7 @@
             return [
                 m('div.container', [
                     m('h4', 'My Trained Locations'),
+                    deleteView(ctrl),
                     tableview(ctrl)
                 ])
             ];

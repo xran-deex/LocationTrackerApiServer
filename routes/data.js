@@ -14,7 +14,7 @@ module.exports = {
         } else {
             r.connect(db_config).then(function(conn){
                 r.table('locations')
-    				.insert({apikey: req.body.apikey, name: req.body.name, data: req.body.data, preferedWifi: req.body.preferedWifi})
+    				.insert({apikey: req.body.apikey, name: req.body.name, data: req.body.data})//, preferedWifi: req.body.preferedWifi})
     				.run(conn).then(function(result){
                         res.json(result);
                     });

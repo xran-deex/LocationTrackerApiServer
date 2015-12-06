@@ -21,11 +21,6 @@ h1, h4, h6 {
     margin-top: 35px;
 }
 
-.train_btn {
-    width: 100%;
-    margin-top: 20px;
-}
-
 .table_btn {
     width: 90px;
     padding: 0 8px;
@@ -33,14 +28,33 @@ h1, h4, h6 {
 }
 
 .btnspinner {
-    margin: 0 auto;
-    width: 40%;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
 }
 
-.spinner {
-    margin-left: 30px;
+.btnspinner .btn {
+    flex: 0 1 auto;
+    margin: 10px;
 }
 
 nav {
     background-color: #41446F;
+}
+
+.flex-container {
+    display: flex;
+    justify-content: center;
+}
+
+/* charts */
+.axis {
+	  font: sans-serif;
+	}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
 }

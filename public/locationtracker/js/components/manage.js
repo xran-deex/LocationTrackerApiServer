@@ -114,9 +114,14 @@
         // monitor progress messages from the server
         self.ws.onmessage = function(event){
             var data = JSON.parse(event.data);
-            if(data.log){
+            if(data.log && data.log > 0.005){
                 m.startComputation();
                 self.log('Error: ' + data.log.error.toFixed(4));
+                m.endComputation();
+            }
+            if(data.log <= 0.005) {
+                m.startComputation();
+                self.log(null);
                 m.endComputation();
             }
         };
@@ -134,7 +139,8 @@
 
     var deleteView = function(ctrl){
         if(ctrl.vm.hasDeleted()){
-            return m('div.btnspinner', [
+            return m('div.row.flex-container', [
+                m('div.btnspinner', [
                 (function(){
                     if(!ctrl.vm.wait())
                     return [
@@ -158,7 +164,8 @@
                         ])
                     ]);
                 })()
-                ]);
+                ])
+            ]);
         }
     };
 
@@ -190,8 +197,8 @@
                 m('div.input-field', [
                     m('input[type=text]#name', {onchange: m.withAttr('value', ctrl.vm.name), placeholder: 'Name', class: 'validate', name:'name'}, ctrl.vm.name())
                 ]),
-                m('div.row', [
-                    m('div', {class: 'col s8 offset-s4'}, [
+                m('div.row.flex-container', [
+                    m('div', {class: 'col'}, [
                         m('button.btn.waves-effect.waves-light', {onclick: ctrl.vm.submit}, 'Submit')
                     ])
                 ])
@@ -201,8 +208,8 @@
 
     var cancelTraining = function(ctrl){
         if(ctrl.vm.log()){
-            return m('div.row', [
-                m('div', {class: 'col s8 offset-s4'}, [
+            return m('div.row.flex-container', [
+                m('div', {class: 'col'}, [
                     m('button.btn.waves-effect.waves-light', {onclick: ctrl.vm.cancel}, 'Cancel')
                 ])
             ]);
@@ -215,14 +222,12 @@
             return [
                 m('div.container', [
                     m('h4', 'My Locations'),
+                    deleteView(ctrl),
+                    m('h6', ctrl.vm.log()),
+                    cancelTraining(ctrl),
+                    nameFormView(ctrl),
                     tableview(ctrl),
-                    m('div.row', [
-                        deleteView(ctrl)
-                    ])
-                ]),
-                m('h6', ctrl.vm.log()),
-                cancelTraining(ctrl),
-                nameFormView(ctrl)
+                ])
             ];
         }
     };

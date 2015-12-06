@@ -19,6 +19,11 @@ var NavLinks = [
         loggedIn: true
     },
     {
+        name:'Analysis',
+        href:'#/analysis',
+        loggedIn: true
+    },
+    {
         name:'Logout',
         href:'#/logout',
         loggedIn: true
@@ -53,6 +58,7 @@ m.route(document.getElementById('app'), '/', {
     '/login': app.Login,
     '/signup': app.Signup,
     '/manage': app.ManageLocations,
+    '/analysis': app.Analysis,
     '/locations': app.TrainedLocations,
     '/logout': {
         controller: function(){

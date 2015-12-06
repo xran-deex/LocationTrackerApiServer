@@ -32,6 +32,7 @@ var user_routes = require('./routes/user');
 var wifi_routes = require('./routes/wifi');
 var data_routes = require('./routes/data');
 var train_routes = require('./routes/train');
+var analysis_routes = require('./routes/analysis');
 
 var dbConfig = require('./config');
 var db_config = {
@@ -101,6 +102,9 @@ app.get('/locationtracker/default', train_routes.get_default);
 app.post('/locationtracker/train', function(req, res){
     train_routes.train(req, res, wss);
 });
+
+/// analysis ///
+app.post('/locationtracker/test', analysis_routes.test);
 
 app.post('/locationtracker', function(req, res){
     training.train({id: -1, data: req.body});

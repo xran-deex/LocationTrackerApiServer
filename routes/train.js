@@ -131,7 +131,7 @@ module.exports = {
                         ids: req.body.ids,
                         locations: location_array,
                         //type: req.body.type,
-                        preferedWifi: location_array[0].preferedWifi,
+                        //preferedWifi: location_array[0].preferedWifi,
                         apikey: req.query.apikey
                     }).run(conn).then(function start_training(result){
                         // train the data using either a support vector machine, or a neural network
