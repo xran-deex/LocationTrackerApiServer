@@ -168,6 +168,9 @@
      *  Draws a series of bar charts with the test results
      */
     var render_bar_chart = function(ctrl){
+
+        // http://bl.ocks.org/mbostock/3887051
+
         var margin = {top: 20, right: 20, bottom: 30, left: 40},
         width = 660 - margin.left - margin.right,
         height = 500 - margin.top - margin.bottom;
@@ -259,6 +262,9 @@
      *  Draws a series of pie charts with the test results
      */
     var render_pie_chart = function(ctrl){
+
+        // http://bl.ocks.org/mbostock/1305337
+
         var margin = {top: 20, right: 20, bottom: 30, left: 40},
         width = 660 - margin.left - margin.right,
         height = 500 - margin.top - margin.bottom;

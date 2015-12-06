@@ -93,7 +93,7 @@ module.exports = {
             res.json({error:'Missing apikey'});
         } else {
             r.connect(db_config).then(function(conn){
-                r.table('trained_locations').update({apikey:req.query.apikey, '_default':false}).run(conn).then(function(){
+                r.table('trained_locations').filter({apikey:req.query.apikey}).update({'_default':false}).run(conn).then(function(){
                     r.table('trained_locations').get(req.body.id).update({'_default':true}).run(conn).then(function(result){
                             res.json(result);
                         }).error(function(err){res.json(err);});

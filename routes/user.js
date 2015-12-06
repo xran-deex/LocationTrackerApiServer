@@ -1,3 +1,9 @@
+var r = require('rethinkdb');
+var dbConfig = require('../config');
+var db_config = {
+    db: dbConfig.db,
+    host: dbConfig.host
+};
 /**
  *  User routes
  */
@@ -22,8 +28,17 @@ module.exports = {
         else {
             req.login(newUser.data, function(err){
                 if(err) res.json({success:false});
-                else res.json({success: true, result: newUser});
+                else res.json({success: true, result: newUser.data});
             });
         }
+    },
+    check_api_key: function(req, res){
+        r.connect(db_config).then(function(conn){
+            r.table('clients').filter({apikey: req.query.apikey}).run(conn).then(function(cursor){
+                cursor.toArray().then(function(result){
+                    res.json(result);
+                });
+            });
+        });
     }
 };

@@ -1,14 +1,14 @@
 (function(app){
 
 
-    var model = function(){
+    var Model = function(){
         var self = this;
         this.title = m.prop('Location Tracker');
         this.update = function(){};
     };
 
     app.vm = function(){
-        this.model = app.model = new model();
+        this.model = app.model = new Model();
         this.msg = m.prop();
         this.welcomeMsg = function(){
             if(app.user().email){

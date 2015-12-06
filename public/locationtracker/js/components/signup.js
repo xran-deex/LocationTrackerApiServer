@@ -61,29 +61,31 @@
                     m('label', {for: 'password2', class: 'active'}, 'Retype Password:')
                 ])
             ]),
-            m('div.btnspinner', [
-                (function(){
-                    if(!ctrl.vm.wait())
-                    return m('button.btn.waves-effect.waves-light', {onclick: ctrl.vm.submit}, 'Submit', [
-                        m('i.material-icons.right', 'send')
-                    ]);
-                })(),
-                (function(){
-                    if(ctrl.vm.wait())
-                    return m('div.preloader-wrapper.big.active.spinner', [
-                        m('div.spinner-layer.spinner-blue-only', [
-                            m('div.circle-clipper.left', [
-                                m('div.circle')
-                            ]),
-                            m('div.gap-patch', [
-                                m('div.circle')
-                            ]),
-                            m('div.circle-clipper.right', [
-                                m('div.circle')
+            m('div.row.flex-container', [
+                m('div.btnspinner', [
+                    (function(){
+                        if(!ctrl.vm.wait())
+                        return m('button.btn.waves-effect.waves-light', {onclick: ctrl.vm.submit}, 'Submit', [
+                            m('i.material-icons.right', 'send')
+                        ]);
+                    })(),
+                    (function(){
+                        if(ctrl.vm.wait())
+                        return m('div.preloader-wrapper.big.active.spinner', [
+                            m('div.spinner-layer.spinner-blue-only', [
+                                m('div.circle-clipper.left', [
+                                    m('div.circle')
+                                ]),
+                                m('div.gap-patch', [
+                                    m('div.circle')
+                                ]),
+                                m('div.circle-clipper.right', [
+                                    m('div.circle')
+                                ])
                             ])
-                        ])
-                    ]);
-                })()
+                        ]);
+                    })()
+                ])
             ])
         ]);
     };

@@ -63,6 +63,7 @@ m.route(document.getElementById('app'), '/', {
     '/logout': {
         controller: function(){
             m.request({method:'get', url:app.APIURL+'/logout'}).then(function(res){
+                app.user(null);
                 m.route('/login');
             });
         },

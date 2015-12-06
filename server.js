@@ -81,6 +81,7 @@ app.get('/locationtracker/logout', user_routes.logout);
 app.post('/locationtracker/signup', function(req, res){
     auth.signup(req.body, user_routes.signup.bind(null, req, res));
 });
+app.get('/locationtracker/check_api_key', user_routes.check_api_key);
 
 /// wifi routes ///
 app.post('/locationtracker/wifi', wifi_routes.post);
