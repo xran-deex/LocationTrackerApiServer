@@ -6,7 +6,7 @@
         this.name = opt.name;
         this.id = opt.id;
         this.ready = opt.ready;
-	this.error = opt.error || NaN;
+	    this.error = m.prop(opt.error || NaN);
         this.selected = m.prop(false);
         this.default = m.prop(opt._default);
 
@@ -48,6 +48,34 @@
                     return 0;
                 });
             });
+        };
+        self.ws = new WebSocket(app.WEBSOCKET_URL);
+
+        // monitor progress messages from the server
+        self.ws.onmessage = function(event){
+            var data = JSON.parse(event.data);
+            var result;
+            if(data.log && data.log.error > 0.005){
+                m.startComputation();
+                result = self.data().filter(function(item){
+                    return item.id == data.id;
+                });
+                if(result.length == 1)
+                    result[0].error(data.log.error);
+                m.endComputation();
+            }
+            if(data.result){
+                m.startComputation();
+                result = self.data().filter(function(item){
+                    return item.id == data.id;
+                });
+                console.log(data.result);
+                if(result.length == 1) {
+                    result[0].error(data.result.result.error);
+                    result[0].ready = true;
+                }
+                m.endComputation();
+            }
         };
     };
 
@@ -96,6 +124,7 @@
                 console.log(res);
             });
         };
+
     };
 
     // the app controller
@@ -131,7 +160,10 @@
                 })()
             ])
         ]);
-        }
+    } else {
+        // add a placeholder div so the cotent doesn't move
+        return m('div', {style: 'height: 76px;'});
+    }
     };
 
     var tableview = function(ctrl){
@@ -151,7 +183,7 @@
                         return m('tr', [
                             m('td', item.name),
                             m('td', item.ready ? 'Yes':'No'),
-			                m('td', item.error.toFixed(5)),
+			                m('td', item.error().toFixed(5)),
                             m('td', [
                                 m('input[type=checkbox]', {id: 'item'+i, onchange: ctrl.vm.deleteCheck, onclick: m.withAttr("checked", item.selected), checked: item.selected()}),
                                 m('label', {for: 'item'+i})

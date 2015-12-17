@@ -21,11 +21,11 @@ var train = function(data, wss){
                     type: 'nn'
                 }).run(conn);
             });
-            wss.broadcast(JSON.stringify({'result': m.result}));
+            wss.broadcast(JSON.stringify({'result': m.result, id: m.id}));
         }
         try{
             if(m.log) {
-                wss.broadcast(JSON.stringify({'log': m.log}));
+                wss.broadcast(JSON.stringify({'log': m.log, id: data.id}));
             }
         } catch(e){
             console.log(e);

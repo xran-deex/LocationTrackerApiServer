@@ -109,7 +109,7 @@
                 console.log(err);
             });
         };
-        self.ws = new WebSocket('ws://valis.strangled.net/locationtrackersocket');
+        self.ws = new WebSocket(app.WEBSOCKET_URL);
 
         // monitor progress messages from the server
         self.ws.onmessage = function(event){
@@ -166,6 +166,9 @@
                 })()
                 ])
             ]);
+        } else {
+            // add a placeholder div so the cotent doesn't move
+            return m('div', {style: 'height: 125px;'});
         }
     };
 

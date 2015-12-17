@@ -2,7 +2,9 @@
     app.log = function(val){
         console.log(val);
     };
-    app.APIURL = 'http://valis.strangled.net/locationtracker';
+    app.APIURL = '//valis.strangled.net/locationtracker';
+    var scheme = location.protocol.indexOf("https") > -1 ? "wss" : "ws";
+    app.WEBSOCKET_URL = scheme + "://valis.strangled.net/locationtrackersocket";
     app.user = m.prop();
     m.request({method:'get', url:app.APIURL+'/user'}).then(function(res){
         if(res.success) {

@@ -31,7 +31,9 @@
         };
         this.update = function(){
             self.fetchData(function(data){
-                self.data(data.map(function(item){
+                self.data(data.filter(function(e){
+                    return e.name.indexOf('test') >= 0;
+                }).map(function(item){
                     item = new ItemModel(self, item);
                     item.selected = m.prop(false);
                     return item;

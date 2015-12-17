@@ -5,13 +5,6 @@ var Architect = synaptic.Architect;
 var Trainer = synaptic.Trainer;
 var abort = false;
 process.on('message', function(m){
-    // console.log('Num outputs: ' + m.data[0].output.length);
-    // console.log(m.data);
-    // console.log(m.data[0].input.length);
-    // //var num = m.data[0].input.length;
-    // m.data.forEach(function(d){
-    //     //console.log(d.input.length);
-    // });
 
     network = new Architect.Perceptron(m.data[0].input.length, m.data[0].input.length, m.data[0].output.length);
     trainer = new Trainer(network);
